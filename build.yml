@@ -1,0 +1,180 @@
+```yaml
+name: Build luci-app-logcenter APK
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+  pull_request:
+
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - target: qualcommax
+            subtarget: ipq60xx
+
+          # 后续可直接取消注释扩展多平台
+          # - target: x86
+          #   subtarget: 64
+          #
+          # - target: rockchip
+          #   subtarget: armv8
+
+    steps:
+      - name: Checkout Source
+        uses: actions/checkout@v4
+
+      ########################################################
+      # Install Dependencies
+      ########################################################
+      - name: Install Dependencies
+        run: |
+          sudo apt-get update
+
+          sudo apt-get install -y \
+            build-essential \
+            clang \
+            flex \
+            bison \
+            g++ \
+            gawk \
+            gettext \
+            git \
+            libncurses-dev \
+            libssl-dev \
+            python3-setuptools \
+            python3-dev \
+            rsync \
+            unzip \
+            zlib1g-dev \
+            swig \
+            wget \
+            file \
+            zstd \
+            qdbus-qt5
+
+      ########################################################
+      # Download ImmortalWrt SDK
+      ########################################################
+      - name: Download ImmortalWrt SDK
+        run: |
+          BASE_URL="https://downloads.immortalwrt.org/snapshots/targets/${{ matrix.target }}/${{ matrix.subtarget }}/"
+
+          echo "SDK URL:"
+          echo "$BASE_URL"
+
+          SDK_FILENAME=$(wget -qO- $BASE_URL | \
+            grep -oE 'immortalwrt-sdk-[^"]+\.tar\.zst' | \
+            head -n 1)
+
+          if [ -z "$SDK_FILENAME" ]; then
+            echo "ERROR: SDK not found"
+            exit 1
+          fi
+
+          echo "Found SDK:"
+          echo "$SDK_FILENAME"
+
+          wget "${BASE_URL}${SDK_FILENAME}" -O sdk.tar.zst
+
+          mkdir sdk
+
+          zstd -d sdk.tar.zst -c | \
+            tar -xf - -C sdk --strip-components=1
+
+      ########################################################
+      # Configure SDK
+      ########################################################
+      - name: Configure SDK
+        run: |
+          cd sdk
+
+          ####################################################
+          # Update feeds
+          ####################################################
+          ./scripts/feeds update -a
+
+          ####################################################
+          # Install LuCI base
+          ####################################################
+          ./scripts/feeds install luci-base
+
+          ####################################################
+          # Copy package
+          ####################################################
+          mkdir -p package/luci-app-logcenter
+
+          rsync -av \
+            --exclude='sdk' \
+            --exclude='.git' \
+            ../* package/luci-app-logcenter/
+
+          ####################################################
+          # Build config
+          ####################################################
+          cat > .config <<EOF
+          CONFIG_TARGET_${{ matrix.target }}=y
+          CONFIG_TARGET_${{ matrix.target }}_${{ matrix.subtarget }}=y
+
+          CONFIG_PACKAGE_luci-app-logcenter=m
+          CONFIG_PACKAGE_luci-i18n-logcenter-zh-cn=m
+
+          CONFIG_USE_APK=y
+          EOF
+
+          ####################################################
+          # Expand dependencies
+          ####################################################
+          make defconfig
+
+      ########################################################
+      # Compile
+      ########################################################
+      - name: Compile Package
+        run: |
+          cd sdk
+
+          make package/luci-app-logcenter/compile \
+            -j$(nproc) \
+            V=s
+
+      ########################################################
+      # Debug APK/IPK Output
+      ########################################################
+      - name: Debug Output
+        run: |
+          echo "================================="
+          echo "APK Packages"
+          echo "================================="
+
+          find sdk/bin/packages/ -name "*.apk"
+
+          echo "================================="
+          echo "IPK Packages"
+          echo "================================="
+
+          find sdk/bin/packages/ -name "*.ipk"
+
+      ########################################################
+      # Upload APK/IPK
+      ########################################################
+      - name: Upload Build Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: luci-app-logcenter-${{ matrix.target }}-${{ matrix.subtarget }}
+
+          path: |
+            sdk/bin/packages/**/luci-app-logcenter*.apk
+            sdk/bin/packages/**/luci-app-logcenter*.ipk
+            sdk/bin/packages/**/luci-i18n-logcenter-zh-cn*.apk
+            sdk/bin/packages/**/luci-i18n-logcenter-zh-cn*.ipk
+```
