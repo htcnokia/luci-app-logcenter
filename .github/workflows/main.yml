@@ -1,4 +1,3 @@
-```yaml
 name: Build luci-app-logcenter APK
 
 on:
@@ -177,4 +176,3 @@ jobs:
             sdk/bin/packages/**/luci-app-logcenter*.ipk
             sdk/bin/packages/**/luci-i18n-logcenter-zh-cn*.apk
             sdk/bin/packages/**/luci-i18n-logcenter-zh-cn*.ipk
-```
