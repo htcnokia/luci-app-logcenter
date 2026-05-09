@@ -1,95 +1,124 @@
-'use strict';
-'require view';
-'require rpc';
-'require ui';
 
-var callLog = rpc.declare({
-    object: 'logcenter',
-    method: 'read',
-    expect: { '': {} }
-});
+'use strict';
+
+'require view';
+'require fs';
+
+async function callLog() {
+    try {
+        return await fs.exec_direct('/sbin/logread', [
+            '-e',
+            'pppd|netifd|dnsmasq|dropbear|firewall|odhcpd'
+        ]);
+    }
+    catch (e) {
+        return 'Failed to read logs: ' + e;
+    }
+}
 
 function parseLine(line) {
     let event = {
         raw: line,
         type: 'other',
-        level: 'info'
+        color: '#999'
     };
 
     if (line.includes('link is down')) {
-        event.type = 'wan_down';
-        event.level = 'error';
+        event.type = 'WAN DOWN';
+        event.color = '#e74c3c';
     }
     else if (line.includes('link is up')) {
-        event.type = 'wan_up';
-        event.level = 'success';
+        event.type = 'WAN UP';
+        event.color = '#2ecc71';
     }
     else if (line.includes('pppd')) {
-        event.type = 'pppoe';
+        event.type = 'PPPOE';
+        event.color = '#3498db';
     }
     else if (line.includes('dropbear')) {
-        event.type = 'ssh';
+        event.type = 'SSH';
+        event.color = '#9b59b6';
     }
-    else if (line.includes('dnsmasq')) {
-        event.type = 'dhcp';
+    else if (line.includes('dnsmasq') || line.includes('odhcpd')) {
+        event.type = 'DHCP';
+        event.color = '#f39c12';
     }
     else if (line.includes('firewall')) {
-        event.type = 'firewall';
+        event.type = 'FIREWALL';
+        event.color = '#16a085';
     }
 
     return event;
 }
 
-function renderBadge(type) {
-    let color = '#999';
-
-    switch(type) {
-        case 'wan_down':
-            color = '#e74c3c';
-            break;
-        case 'wan_up':
-            color = '#2ecc71';
-            break;
-        case 'pppoe':
-            color = '#3498db';
-            break;
-        case 'ssh':
-            color = '#9b59b6';
-            break;
-        case 'dhcp':
-            color = '#f39c12';
-            break;
-    }
-
+function renderBadge(type, color) {
     return E('span', {
-        style: 'display:inline-block;padding:2px 8px;border-radius:12px;background:' + color + ';color:white;font-size:12px;margin-right:8px;'
-    }, type.toUpperCase());
+        style: `
+            display:inline-block;
+            padding:2px 10px;
+            border-radius:12px;
+            background:${color};
+            color:white;
+            font-size:11px;
+            font-weight:bold;
+            margin-right:8px;
+            min-width:90px;
+            text-align:center;
+        `
+    }, type);
 }
 
 return view.extend({
-    load: function() {
-        return callLog();
+
+    title: _('LogCenter Timeline'),
+
+    load: async function() {
+        return await callLog();
     },
 
     render: function(logs) {
-        let lines = String(logs || '').split('\n').filter(Boolean);
 
-        let timeline = lines.reverse().map(function(line) {
+        logs = String(logs || '');
+
+        let lines = logs.split('\n').filter(Boolean);
+
+        lines.reverse();
+
+        let timeline = lines.map(function(line) {
+
             let parsed = parseLine(line);
 
             return E('div', {
-                style: 'padding:10px;border-bottom:1px solid #eee;font-family:monospace;'
+                style: `
+                    padding:10px;
+                    border-bottom:1px solid #eee;
+                    font-family:monospace;
+                    line-height:1.5;
+                    word-break:break-all;
+                `
             }, [
-                renderBadge(parsed.type),
+
+                renderBadge(parsed.type, parsed.color),
+
                 E('span', {}, line)
             ]);
         });
 
         return E('div', { class: 'cbi-map' }, [
-            E('h2', {}, 'LogCenter Timeline'),
+
+            E('h2', {
+                style: 'margin-bottom:20px;'
+            }, _('LogCenter Timeline')),
+
             E('div', {
-                style: 'background:white;border-radius:8px;padding:10px;'
+                style: `
+                    background:white;
+                    border-radius:8px;
+                    overflow:hidden;
+                    box-shadow:0 2px 8px rgba(0,0,0,0.08);
+                `
             }, timeline)
+
         ]);
     }
 });
