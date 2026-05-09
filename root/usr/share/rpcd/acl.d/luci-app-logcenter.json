@@ -1,15 +1,21 @@
+
 {
     "luci-app-logcenter": {
         "description": "Grant access to LogCenter",
+
         "read": {
             "ubus": {
-                "log": ["read"]
-            }
-        },
-        "write": {
-            "ubus": {
-                "log": ["write"]
+                "file": [
+                    "exec"
+                ]
+            },
+
+            "file": {
+                "/sbin/logread": [
+                    "exec"
+                ]
             }
         }
     }
 }
+
