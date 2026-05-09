@@ -1,0 +1,26 @@
+#!/bin/sh
+
+case "$1" in
+list)
+cat << EOF
+{
+    "read": {
+        "args": []
+    }
+}
+EOF
+;;
+
+call)
+method="$2"
+
+case "$method" in
+read)
+logread -e "pppd|netifd|dnsmasq|dropbear|firewall|odhcpd" | tail -n 300
+;;
+*)
+exit 1
+;;
+esac
+;;
+esac

@@ -1,0 +1,4 @@
+config logcenter 'main'
+    option enable '1'
+    option max_lines '500'
+    option realtime '1'

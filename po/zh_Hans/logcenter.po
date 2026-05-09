@@ -1,0 +1,2 @@
+msgid "LogCenter"
+msgstr "日志中心"
