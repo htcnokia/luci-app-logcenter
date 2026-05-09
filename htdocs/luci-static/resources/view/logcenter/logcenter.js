@@ -6,10 +6,12 @@
 
 async function callLog() {
     try {
-        return await fs.exec_direct('/sbin/logread', [
+        let res = await fs.exec('/sbin/logread', [
             '-e',
             'pppd|netifd|dnsmasq|dropbear|firewall|odhcpd'
         ]);
+
+        return res.stdout || '';
     }
     catch (e) {
         return 'Failed to read logs: ' + e;
@@ -17,9 +19,10 @@ async function callLog() {
 }
 
 function parseLine(line) {
+
     let event = {
         raw: line,
-        type: 'other',
+        type: 'OTHER',
         color: '#999'
     };
 
@@ -52,6 +55,7 @@ function parseLine(line) {
 }
 
 function renderBadge(type, color) {
+
     return E('span', {
         style: `
             display:inline-block;
@@ -122,3 +126,4 @@ return view.extend({
         ]);
     }
 });
+
