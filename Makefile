@@ -3,7 +3,7 @@ include $(TOPDIR)/rules.mk
 
 LUCI_TITLE:=LogCenter Timeline
 LUCI_PKGARCH:=all
-
+VERSION:=0.1.0
 include $(INCLUDE_DIR)/package.mk
 
 define Package/luci-app-logcenter
