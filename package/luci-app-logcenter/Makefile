@@ -1,5 +1,7 @@
 # SPDX-License-Identifier: GPL-2.0-only
-VERSION:=0.1.0
+PKG_NAME:=luci-app-logcenter
+PKG_VERSION:=0.1.0
+PKG_RELEASE:=1
 
 include $(TOPDIR)/rules.mk
 include $(INCLUDE_DIR)/package.mk
@@ -7,7 +9,7 @@ include $(INCLUDE_DIR)/package.mk
 LUCI_TITLE:=LogCenter Timeline
 LUCI_PKGARCH:=all
 
-define Package/luci-app-logcenter
+define Package/$(PKG_NAME)
   SECTION:=luci
   CATEGORY:=LuCI
   SUBMENU:=3. Applications
@@ -15,7 +17,7 @@ define Package/luci-app-logcenter
   DEPENDS:=+luci-base
 endef
 
-define Package/luci-app-logcenter/install
+define Package/$(PKG_NAME)/install
 	$(INSTALL_DIR) $(1)/www/luci-static/resources/view/logcenter
 	$(INSTALL_DATA) ./files/htdocs/luci-static/resources/view/logcenter/logcenter.js \
 	                 $(1)/www/luci-static/resources/view/logcenter/
@@ -33,4 +35,4 @@ define Package/luci-app-logcenter/install
 	                 $(1)/usr/lib/lua/luci/model/cbi/
 endef
 
-$(eval $(call BuildPackage,luci-app-logcenter))
+$(eval $(call BuildPackage,$(PKG_NAME)))
