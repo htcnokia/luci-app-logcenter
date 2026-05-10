@@ -1,17 +1,25 @@
-
+# SPDX-License-Identifier: GPL-2.0-only
 include $(TOPDIR)/rules.mk
 
-PKG_NAME:=luci-app-logcenter
-PKG_VERSION:=0.1.0
-PKG_RELEASE:=1
-
-PKG_LICENSE:=MIT
-PKG_MAINTAINER:=Seco
-
-LUCI_TITLE:=LuCI LogCenter
-LUCI_DEPENDS:=+luci-base +rpcd +logd
+LUCI_TITLE:=LogCenter Timeline
 LUCI_PKGARCH:=all
 
-include $(TOPDIR)/feeds/luci/luci.mk
+include $(INCLUDE_DIR)/package.mk
 
-# call BuildPackage - OpenWrt buildroot signature
+define Package/luci-app-logcenter
+  SECTION:=luci
+  CATEGORY:=LuCI
+  SUBMENU:=3. Applications
+  TITLE:=LogCenter Timeline
+  DEPENDS:=+luci-compat +busybox-logread
+endef
+
+define Package/luci-app-logcenter/install
+	$(INSTALL_DIR) $(1)/www/luci-static/resources/view/logcenter
+	$(INSTALL_DATA) ./package/luci-app-logcenter/files/htdocs/luci-static/resources/view/logcenter/logcenter.js $(1)/www/luci-static/resources/view/logcenter/
+
+	$(INSTALL_DIR) $(1)/etc/rpcd/acl.d
+	$(INSTALL_DATA) ./package/luci-app-logcenter/files/etc/rpcd/acl.d/luci-app-logcenter.json $(1)/etc/rpcd/acl.d/
+endef
+
+$(eval $(call BuildPackage,luci-app-logcenter))
