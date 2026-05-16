@@ -1,38 +1,13 @@
 # SPDX-License-Identifier: GPL-2.0-only
-PKG_NAME:=luci-app-logcenter
-PKG_VERSION:=0.1.0
-PKG_RELEASE:=1
 
 include $(TOPDIR)/rules.mk
-include $(INCLUDE_DIR)/package.mk
 
-LUCI_TITLE:=LogCenter Timeline
+LUCI_TITLE:=LuCI Log Center
+LUCI_DESCRIPTION:=A timeline-style log viewer for OpenWrt system logs (logread).
 LUCI_PKGARCH:=all
+PKG_VERSION:=1.0.0
+PKG_RELEASE:=1
 
-define Package/$(PKG_NAME)
-  SECTION:=luci
-  CATEGORY:=LuCI
-  SUBMENU:=3. Applications
-  TITLE:=LogCenter Timeline
-  DEPENDS:=+luci-base
-endef
+include $(TOPDIR)/feeds/luci/luci.mk
 
-define Package/$(PKG_NAME)/install
-	$(INSTALL_DIR) $(1)/www/luci-static/resources/view/logcenter
-	$(INSTALL_DATA) ./files/htdocs/luci-static/resources/view/logcenter/logcenter.js \
-	                 $(1)/www/luci-static/resources/view/logcenter/
-
-	$(INSTALL_DIR) $(1)/etc/rpcd/acl.d
-	$(INSTALL_DATA) ./files/etc/rpcd/acl.d/luci-app-logcenter.json \
-	                 $(1)/etc/rpcd/acl.d/
-
-	$(INSTALL_DIR) $(1)/usr/lib/lua/luci/controller
-	$(INSTALL_DATA) ./luasrc/controller/logcenter.lua \
-	                 $(1)/usr/lib/lua/luci/controller/
-
-	$(INSTALL_DIR) $(1)/usr/lib/lua/luci/model/cbi
-	$(INSTALL_DATA) ./luasrc/model/cbi/logcenter.lua \
-	                 $(1)/usr/lib/lua/luci/model/cbi/
-endef
-
-$(eval $(call BuildPackage,$(PKG_NAME)))
+# call BuildPackage - OpenWrt buildroot signature
