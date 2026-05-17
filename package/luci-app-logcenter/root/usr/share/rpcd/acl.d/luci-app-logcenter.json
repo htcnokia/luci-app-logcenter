@@ -1,0 +1,15 @@
+{
+	"luci-app-logcenter": {
+		"description": "Grant access for luci-app-logcenter",
+		"read": {
+			"ubus": {
+				"session": [ "access", "login" ],
+				"file": [ "exec", "stat" ]
+			},
+			"file": {
+				"/sbin/logread": [ "exec" ],
+				"/var/log/messages": [ "read" ]
+			}
+		}
+	}
+}

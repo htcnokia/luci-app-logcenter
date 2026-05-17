@@ -1,0 +1,35 @@
+msgid ""
+msgstr ""
+"Language: zh_Hans\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Plural-Forms: nplurals=1; plural=0;\n"
+
+msgid "Log Center"
+msgstr "日志中心"
+
+msgid "All"
+msgstr "全部"
+
+msgid "Level:"
+msgstr "级别："
+
+msgid "Search:"
+msgstr "搜索："
+
+msgid "Filter logs..."
+msgstr "过滤日志..."
+
+msgid "Refresh"
+msgstr "刷新"
+
+msgid "Download"
+msgstr "下载"
+
+msgid "No log entries found."
+msgstr "未找到日志条目。"
+
+msgid "Total: %d lines"
+msgstr "共 %d 行"
+
+msgid "Grant access for luci-app-logcenter"
+msgstr "授权访问 luci-app-logcenter"

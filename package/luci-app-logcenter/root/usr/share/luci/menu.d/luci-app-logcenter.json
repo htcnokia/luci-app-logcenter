@@ -1,0 +1,13 @@
+{
+	"admin/status/logcenter": {
+		"title": "Log Center",
+		"order": 75,
+		"action": {
+			"type": "view",
+			"path": "logcenter/logcenter"
+		},
+		"depends": {
+			"acl": [ "luci-app-logcenter" ]
+		}
+	}
+}
